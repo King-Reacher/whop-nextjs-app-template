@@ -3,8 +3,7 @@ import { AREAS, RENT_CAPS, ROOM_TYPES, WALK_CAPS } from "@/lib/config";
 import { naira } from "@/lib/format";
 import type { HostelFilters } from "@/lib/hostels";
 
-const select =
-	"mt-1 block w-full rounded-lg border border-line bg-white px-2 py-2 text-sm";
+const select = "field !py-2 !px-2.5 !text-sm";
 
 /** Plain GET form, so filtering works without any JavaScript. */
 export function Filters({
@@ -22,21 +21,18 @@ export function Filters({
 		).length + filters.amenities.length;
 
 	return (
-		<details
-			open={active > 0}
-			className="group mt-6 rounded-xl border border-line bg-card"
-		>
-			<summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-medium [&::-webkit-details-marker]:hidden">
+		<details open={active > 0} className="panel group mt-8">
+			<summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3.5 text-sm font-semibold [&::-webkit-details-marker]:hidden">
 				<span>
 					Filters
 					{active > 0 && (
-						<span className="ml-2 rounded-full bg-brand-soft px-2 py-0.5 text-xs text-brand-deep">
+						<span className="ml-2 rounded-full bg-brand-soft px-2 py-0.5 text-xs text-brand-ink">
 							{active} on
 						</span>
 					)}
 				</span>
-				<span className="text-muted group-open:hidden">Show</span>
-				<span className="hidden text-muted group-open:inline">Hide</span>
+				<span className="text-brand-glow group-open:hidden">Show</span>
+				<span className="hidden text-brand-glow group-open:inline">Hide</span>
 			</summary>
 			<form action="/" className="border-t border-line p-4">
 				{view === "map" && <input type="hidden" name="view" value="map" />}
@@ -115,7 +111,7 @@ export function Filters({
 							{amenities.map((a) => (
 								<label
 									key={a}
-									className="cursor-pointer rounded-full border border-line bg-white px-3 py-1 text-sm has-[:checked]:border-brand has-[:checked]:bg-brand-soft has-[:checked]:text-brand-deep has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-brand"
+									className="chip cursor-pointer has-[:checked]:border-brand has-[:checked]:bg-brand-soft has-[:checked]:text-brand-ink has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-brand-glow"
 								>
 									<input
 										type="checkbox"
@@ -132,10 +128,7 @@ export function Filters({
 				)}
 
 				<div className="mt-4 flex items-center gap-4">
-					<button
-						type="submit"
-						className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-deep"
-					>
+					<button type="submit" className="btn btn-primary !py-2.5 text-sm">
 						Show rooms
 					</button>
 					<Link

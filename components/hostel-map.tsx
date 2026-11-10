@@ -79,7 +79,7 @@ export function HostelMap({
 			ref={element}
 			role="application"
 			aria-label="Map of rooms"
-			className="h-[70dvh] w-full rounded-xl border border-line bg-brand-soft z-0"
+			className="hs-map z-0 h-[68dvh] w-full overflow-hidden rounded-2xl border border-line"
 		/>
 	);
 }

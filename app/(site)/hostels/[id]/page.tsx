@@ -3,6 +3,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Gallery } from "@/components/gallery";
 import { VerifiedBadge, Walkthrough } from "@/components/hostel-bits";
+import {
+	ArrowLeftIcon,
+	CheckIcon,
+	HeartIcon,
+	LockIcon,
+	PinIcon,
+	WalkIcon,
+} from "@/components/icons";
 import { BRAND, LOCK_FEE, LOCK_HOURS } from "@/lib/config";
 import { installmentPlan, naira, whatsappLink } from "@/lib/format";
 import { getHostel, listReviews } from "@/lib/hostels";
@@ -30,40 +38,50 @@ export default async function HostelPage({ params }: Props) {
 		: false;
 	const plan = installmentPlan(hostel.rent_price);
 	const inquire = whatsappLink(
-		`Hi, I saw ${hostel.name} (ID ${hostel.id}) on ${BRAND.name} and would like to schedule a viewing.`,
+		`Hi, I saw ${hostel.name} (ID ${hostel.id}) on ${BRAND.full} and would like to schedule a viewing.`,
 	);
 
 	return (
-		<div className="grid gap-8 lg:grid-cols-[1fr_20rem]">
+		<div className="grid gap-8 lg:grid-cols-[1fr_22rem]">
 			<div>
-				<Link href="/" className="text-sm text-muted hover:text-ink">
-					← All hostels
+				<Link
+					href="/"
+					className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-ink"
+				>
+					<ArrowLeftIcon width={16} height={16} />
+					All rooms
 				</Link>
 				<div className="mt-4">
 					<Walkthrough hostel={hostel} />
 					<Gallery photos={hostel.photos} name={hostel.name} />
 				</div>
-				<div className="mt-5 flex flex-wrap items-center gap-2">
+
+				<div className="mt-6 flex flex-wrap items-center gap-2">
 					<VerifiedBadge hostel={hostel} />
-					<span className="text-sm text-muted">
-						{hostel.room_type} · {hostel.area}
-						{hostel.walk_minutes
-							? ` · ${hostel.walk_minutes} min walk to campus`
-							: ""}
-					</span>
+					<span className="eyebrow">{hostel.room_type}</span>
 				</div>
-				<h1 className="mt-2 text-2xl font-semibold tracking-tight">
-					{hostel.name}
-				</h1>
-				<p className="mt-3 text-muted max-w-prose">{hostel.description}</p>
+				<h1 className="display mt-3 text-4xl sm:text-5xl">{hostel.name}</h1>
+				<p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted">
+					<span className="inline-flex items-center gap-1.5">
+						<PinIcon width={16} height={16} />
+						{hostel.area}
+					</span>
+					{hostel.walk_minutes && (
+						<span className="inline-flex items-center gap-1.5">
+							<WalkIcon width={16} height={16} />
+							{hostel.walk_minutes} min walk to campus
+						</span>
+					)}
+				</p>
+				<p className="mt-5 max-w-prose text-lg text-muted">
+					{hostel.description}
+				</p>
 
 				{hostel.amenities.length > 0 && (
-					<ul className="mt-5 flex flex-wrap gap-2">
+					<ul className="mt-6 flex flex-wrap gap-2">
 						{hostel.amenities.map((a) => (
-							<li
-								key={a}
-								className="rounded-full border border-line bg-card px-3 py-1 text-sm"
-							>
+							<li key={a} className="chip">
+								<CheckIcon width={14} height={14} className="text-brand-glow" />
 								{a}
 							</li>
 						))}
@@ -71,15 +89,14 @@ export default async function HostelPage({ params }: Props) {
 				)}
 
 				{reviews.length > 0 && (
-					<section className="mt-10">
-						<h2 className="font-medium">From students who booked here</h2>
-						<ul className="mt-3 space-y-3">
+					<section className="mt-12">
+						<h2 className="display text-2xl">From students who booked here</h2>
+						<ul className="mt-4 space-y-3">
 							{reviews.map((r) => (
-								<li
-									key={r.id}
-									className="rounded-xl border border-line bg-card p-4"
-								>
-									<p className="text-sm font-medium">{r.rating} / 5</p>
+								<li key={r.id} className="panel p-4">
+									<p className="text-sm font-semibold text-brand-glow">
+										{r.rating} / 5
+									</p>
 									{r.comment && (
 										<p className="mt-1 text-sm text-muted">{r.comment}</p>
 									)}
@@ -90,9 +107,10 @@ export default async function HostelPage({ params }: Props) {
 				)}
 			</div>
 
-			<aside className="h-fit rounded-xl border border-line bg-card p-5 lg:sticky lg:top-6">
-				<p>
-					<span className="text-2xl font-semibold">
+			<aside className="panel h-fit p-5 lg:sticky lg:top-6">
+				<p className="eyebrow">Rent</p>
+				<p className="mt-2">
+					<span className="text-3xl font-bold tracking-tight">
 						{naira(hostel.rent_price)}
 					</span>
 					<span className="text-sm text-muted"> / session</span>
@@ -102,8 +120,9 @@ export default async function HostelPage({ params }: Props) {
 					<>
 						<Link
 							href={`/hostels/${hostel.id}/lock`}
-							className="mt-4 block rounded-lg bg-brand px-4 py-3 text-center font-medium text-white hover:bg-brand-deep"
+							className="btn btn-primary mt-5 w-full"
 						>
+							<LockIcon width={18} height={18} />
 							Lock down this room · {naira(LOCK_FEE)}
 						</Link>
 						<p className="mt-3 text-sm text-muted">
@@ -113,32 +132,35 @@ export default async function HostelPage({ params }: Props) {
 						</p>
 					</>
 				) : (
-					<p className="mt-4 rounded-lg bg-paper px-4 py-3 text-sm text-muted">
+					<p className="mt-5 rounded-xl border border-line bg-field px-4 py-3 text-sm text-muted">
 						This room has been locked by another student.
 					</p>
 				)}
 
-				{inquire && (
-					<a
-						href={inquire}
-						className="mt-3 block rounded-lg border border-line px-4 py-3 text-center text-sm font-medium hover:border-brand"
-					>
-						Ask on WhatsApp
-					</a>
-				)}
-
-				<form action={toggleSaved.bind(null, hostel.id, saved)}>
-					<button
-						type="submit"
-						aria-pressed={saved}
-						className="mt-3 block w-full rounded-lg border border-line px-4 py-3 text-center text-sm font-medium hover:border-brand"
-					>
-						{saved ? "Saved. Tap to remove" : "Save room"}
-					</button>
-				</form>
+				<div className="mt-4 grid gap-2">
+					{inquire && (
+						<a href={inquire} className="btn btn-ghost w-full text-sm">
+							Ask on WhatsApp
+						</a>
+					)}
+					<form action={toggleSaved.bind(null, hostel.id, saved)}>
+						<button
+							type="submit"
+							aria-pressed={saved}
+							className={`btn btn-ghost w-full text-sm ${saved ? "!border-brand !text-brand-ink" : ""}`}
+						>
+							<HeartIcon
+								width={16}
+								height={16}
+								fill={saved ? "currentColor" : "none"}
+							/>
+							{saved ? "Saved. Tap to remove" : "Save room"}
+						</button>
+					</form>
+				</div>
 
 				<div className="mt-5 border-t border-line pt-4 text-sm">
-					<p className="font-medium">Can't pay it all at once?</p>
+					<p className="font-semibold">Can't pay it all at once?</p>
 					<p className="mt-1 text-muted">
 						Pay {naira(plan.upfrontTotal)} now, then about {naira(plan.monthly)}{" "}
 						a month for {plan.months} months. Estimate only. Every plan is

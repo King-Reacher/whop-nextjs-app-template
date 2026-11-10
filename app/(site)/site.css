@@ -2,32 +2,196 @@
 
 /* biome-ignore lint/suspicious/noUnknownAtRules: Tailwind v4 directive */
 @theme {
-	--color-paper: #f6f4ee;
-	--color-card: #fffdf8;
-	--color-ink: #17211c;
-	--color-muted: #5d6a63;
-	--color-line: #dedacd;
-	--color-brand: #0e5a3c;
-	--color-brand-deep: #0a422c;
-	--color-brand-soft: #e2efe7;
-	--color-notice: #8a4b08;
-	--color-notice-soft: #fbefd9;
-	--color-danger: #a3271c;
+	--color-paper: #09080d;
+	--color-card: #13111a;
+	--color-raised: #1b1825;
+	--color-field: #0e0c14;
+	--color-line: #2c2839;
+	--color-ink: #f6f4fb;
+	--color-muted: #a9a2be;
+	--color-brand: #8b5cf6;
+	--color-brand-strong: #7c3aed;
+	--color-brand-glow: #c4a7ff;
+	--color-brand-soft: #211938;
+	--color-brand-ink: #dccfff;
+	--color-notice: #f2c572;
+	--color-notice-soft: #271e0e;
+	--color-danger: #ff8f8f;
 	--font-sans:
 		ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
+:root {
+	color-scheme: dark;
+	--shine: linear-gradient(135deg, #7c3aed 0%, #9333ea 50%, #c026d3 100%);
+}
+
 body {
-	background: var(--color-paper);
+	background:
+		radial-gradient(
+			56rem 30rem at 85% -12%,
+			rgb(124 58 237 / 0.32),
+			transparent 62%
+		),
+		radial-gradient(
+			38rem 24rem at -12% 6%,
+			rgb(192 38 211 / 0.16),
+			transparent 60%
+		), var(--color-paper);
+	background-repeat: no-repeat;
 	color: var(--color-ink);
 	font-family: var(--font-sans);
 	-webkit-font-smoothing: antialiased;
 }
 
 :focus-visible {
-	outline: 2px solid var(--color-brand);
+	outline: 2px solid var(--color-brand-glow);
 	outline-offset: 2px;
 }
+
+::selection {
+	background: rgb(139 92 246 / 0.45);
+}
+
+@layer components {
+	.display {
+		font-family: var(--font-display), "Iowan Old Style", Georgia, serif;
+		font-weight: 600;
+		letter-spacing: -0.01em;
+		line-height: 1.05;
+	}
+
+	.shine-text {
+		background: linear-gradient(120deg, #c4a7ff 0%, #f0abfc 60%, #ffffff 100%);
+		-webkit-background-clip: text;
+		background-clip: text;
+		color: transparent;
+	}
+
+	.eyebrow {
+		font-size: 0.6875rem;
+		font-weight: 600;
+		letter-spacing: 0.2em;
+		text-transform: uppercase;
+		color: var(--color-brand-glow);
+	}
+
+	/* Glossy dark surface: a faint highlight along the top edge. */
+	.panel {
+		border: 1px solid var(--color-line);
+		border-radius: 1rem;
+		background:
+			linear-gradient(180deg, rgb(255 255 255 / 0.045), transparent 38%),
+			var(--color-card);
+		box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
+	}
+
+	.panel-link {
+		transition:
+			border-color 0.2s,
+			box-shadow 0.2s,
+			transform 0.2s;
+	}
+
+	.panel-link:hover {
+		border-color: rgb(139 92 246 / 0.7);
+		box-shadow:
+			inset 0 1px 0 rgb(255 255 255 / 0.08),
+			0 18px 44px -18px rgb(124 58 237 / 0.65);
+		transform: translateY(-2px);
+	}
+
+	.btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		border-radius: 0.75rem;
+		padding: 0.75rem 1.125rem;
+		font-weight: 600;
+		line-height: 1.25;
+		text-align: center;
+		transition:
+			filter 0.15s,
+			border-color 0.15s,
+			box-shadow 0.15s;
+	}
+
+	.btn-primary {
+		background: var(--shine);
+		color: #fff;
+		box-shadow:
+			inset 0 1px 0 rgb(255 255 255 / 0.28),
+			0 10px 30px -10px rgb(147 51 234 / 0.8);
+	}
+
+	.btn-primary:hover {
+		filter: brightness(1.12);
+	}
+
+	.btn-ghost {
+		border: 1px solid var(--color-line);
+		background: rgb(255 255 255 / 0.03);
+		color: var(--color-ink);
+	}
+
+	.btn-ghost:hover {
+		border-color: var(--color-brand);
+	}
+
+	.field {
+		margin-top: 0.375rem;
+		display: block;
+		width: 100%;
+		border: 1px solid var(--color-line);
+		border-radius: 0.75rem;
+		background: var(--color-field);
+		padding: 0.6875rem 0.875rem;
+		font-size: 1rem;
+		color: var(--color-ink);
+	}
+
+	.field::placeholder {
+		color: rgb(169 162 190 / 0.55);
+	}
+
+	.field:focus {
+		border-color: var(--color-brand);
+		outline: none;
+		box-shadow: 0 0 0 3px rgb(139 92 246 / 0.28);
+	}
+
+	.chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		border: 1px solid var(--color-line);
+		border-radius: 999px;
+		background: rgb(255 255 255 / 0.03);
+		padding: 0.3125rem 0.75rem;
+		font-size: 0.875rem;
+	}
+
+	.alert {
+		border: 1px solid rgb(255 143 143 / 0.35);
+		border-radius: 0.75rem;
+		background: rgb(255 143 143 / 0.08);
+		padding: 0.75rem 1rem;
+		font-size: 0.875rem;
+		color: var(--color-danger);
+	}
+
+	.note {
+		border: 1px solid rgb(242 197 114 / 0.25);
+		border-radius: 0.75rem;
+		background: var(--color-notice-soft);
+		padding: 0.75rem 1rem;
+		font-size: 0.875rem;
+		color: var(--color-notice);
+	}
+}
+
+/* Map */
 
 .price-pin {
 	position: absolute;
@@ -35,13 +199,71 @@ body {
 	white-space: nowrap;
 	border-radius: 999px;
 	border: 2px solid #fff;
-	background: var(--color-brand);
-	padding: 2px 8px;
-	font: 600 12px var(--font-sans);
+	background: var(--shine);
+	padding: 2px 9px;
+	font: 700 12px var(--font-sans);
 	color: #fff;
-	box-shadow: 0 1px 4px rgb(0 0 0 / 0.3);
+	box-shadow: 0 4px 14px rgb(124 58 237 / 0.7);
 }
 
 .price-pin-taken {
-	background: var(--color-muted);
+	background: #4a4558;
+	box-shadow: 0 2px 8px rgb(0 0 0 / 0.5);
+}
+
+/*
+ * Dark map. The .hs-map prefix outranks Leaflet's own stylesheet, which loads
+ * after this file. The filter turns the standard light tiles dark.
+ */
+.hs-map .leaflet-tile-pane {
+	filter: invert(1) hue-rotate(200deg) saturate(0.7) brightness(0.92)
+		contrast(0.92);
+}
+
+.hs-map.leaflet-container {
+	background: var(--color-card);
+	font-family: var(--font-sans);
+}
+
+.hs-map .leaflet-bar {
+	border: 1px solid var(--color-line);
+	box-shadow: 0 6px 20px rgb(0 0 0 / 0.5);
+}
+
+.hs-map .leaflet-bar a,
+.hs-map .leaflet-bar a:hover {
+	border-color: var(--color-line);
+	background: var(--color-raised);
+	color: var(--color-ink);
+}
+
+.hs-map .leaflet-popup-content-wrapper,
+.hs-map .leaflet-popup-tip {
+	border: 1px solid var(--color-line);
+	background: var(--color-raised);
+	color: var(--color-ink);
+	box-shadow: 0 10px 30px rgb(0 0 0 / 0.6);
+}
+
+.hs-map .leaflet-popup-content {
+	font-size: 0.8125rem;
+	line-height: 1.5;
+}
+
+.hs-map .leaflet-popup-content a {
+	color: var(--color-brand-ink);
+	font-size: 0.9375rem;
+}
+
+.hs-map.leaflet-container a.leaflet-popup-close-button {
+	color: var(--color-muted);
+}
+
+.hs-map.leaflet-container .leaflet-control-attribution {
+	background: rgb(9 8 13 / 0.78);
+	color: var(--color-muted);
+}
+
+.hs-map.leaflet-container .leaflet-control-attribution a {
+	color: var(--color-brand-ink);
 }

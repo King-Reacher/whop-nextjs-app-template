@@ -45,13 +45,13 @@ export default async function BookingPage({
 	return (
 		<div className="mx-auto max-w-md">
 			<p
-				className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${
-					paid ? "bg-brand-soft text-brand-deep" : "bg-notice-soft text-notice"
+				className={`inline-block rounded-full px-3 py-1 text-sm font-semibold ${
+					paid ? "bg-brand-soft text-brand-ink" : "bg-notice-soft text-notice"
 				}`}
 			>
 				{statusLabel(booking.status, hasPayments)}
 			</p>
-			<h1 className="mt-4 text-2xl font-semibold tracking-tight">
+			<h1 className="display mt-4 text-4xl">
 				{paid ? "The room is yours to inspect" : "Almost there"}
 			</h1>
 			<p className="mt-2 text-muted">
@@ -62,7 +62,7 @@ export default async function BookingPage({
 						: `We've got your request for ${hostelName}. Online payment isn't switched on yet, so message us to complete the lock.`}
 			</p>
 
-			<dl className="mt-6 divide-y divide-line rounded-xl border border-line bg-card text-sm">
+			<dl className="panel mt-6 divide-y divide-line text-sm">
 				<Row label="Reference" value={booking.reference} />
 				<Row label="Hostel" value={hostelName} />
 				<Row label="Paid" value={naira(booking.amount_paid)} />
@@ -72,10 +72,7 @@ export default async function BookingPage({
 			</dl>
 
 			{chat ? (
-				<a
-					href={chat}
-					className="mt-6 block rounded-lg bg-brand px-4 py-3 text-center font-medium text-white hover:bg-brand-deep"
-				>
+				<a href={chat} className="btn btn-primary mt-6 w-full">
 					Continue on WhatsApp
 				</a>
 			) : (
@@ -88,7 +85,7 @@ export default async function BookingPage({
 				href="/"
 				className="mt-4 block text-center text-sm text-muted hover:text-ink"
 			>
-				Back to hostels
+				Back to rooms
 			</Link>
 		</div>
 	);

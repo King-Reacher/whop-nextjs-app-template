@@ -1,7 +1,13 @@
 /** Business rules for the Week 1 MVP. All money is in naira unless stated. */
 
 export const BRAND = {
-	name: "Solon",
+	/** Shown as the wordmark, with the ampersand styled. */
+	first: "Heinrich",
+	second: "Solon",
+	name: "Heinrich & Solon",
+	descriptor: "Residences",
+	full: "Heinrich & Solon Residences",
+	short: "H&S",
 	parent: "Heinrich & Solon Group",
 	campus: "FUNAAB",
 	city: "Abeokuta",

@@ -1,4 +1,4 @@
--- Solon schema. Run this in the Supabase SQL editor.
+-- Heinrich & Solon Residences schema. Run this in the Supabase SQL editor.
 -- The site reads and writes with the service-role key from the server only,
 -- so row level security is enabled with no public policies.
 

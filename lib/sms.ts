@@ -5,7 +5,7 @@ const KEY = process.env.TERMII_API_KEY;
 const BASE = (
 	process.env.TERMII_BASE_URL ?? "https://api.ng.termii.com"
 ).replace(/\/$/, "");
-const SENDER = process.env.TERMII_SENDER_ID ?? "Solon";
+const SENDER = process.env.TERMII_SENDER_ID ?? "HS Homes";
 
 export const hasSms = Boolean(KEY);
 

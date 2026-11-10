@@ -2,7 +2,8 @@ import Link from "next/link";
 import { Filters } from "@/components/filters";
 import { HostelCard } from "@/components/hostel-card";
 import { HostelMap, type MapPin } from "@/components/hostel-map";
-import { BRAND, LOCK_FEE, MAP_CENTER } from "@/lib/config";
+import { LockIcon, PlayIcon, ShieldIcon } from "@/components/icons";
+import { BRAND, LOCK_FEE, LOCK_HOURS, MAP_CENTER } from "@/lib/config";
 import { naira } from "@/lib/format";
 import {
 	amenityOptions,
@@ -73,18 +74,47 @@ export default async function HomePage({
 				],
 	);
 
+	const cheapest = Math.min(...all.map((h) => Number(h.rent_price)));
+
 	return (
 		<>
-			<section className="max-w-2xl">
-				<h1 className="text-3xl sm:text-4xl font-semibold tracking-tight">
-					Verified hostels near {BRAND.campus}
+			<section className="max-w-3xl">
+				<p className="eyebrow">Student residences · {BRAND.campus}</p>
+				<h1 className="display mt-4 text-5xl sm:text-7xl">
+					Student living, <em className="shine-text pr-1">verified.</em>
 				</h1>
-				<p className="mt-3 text-muted">
-					Watch a real video of the room. Lock it down for {naira(LOCK_FEE)}. If
-					the room doesn't match the video when you arrive, you get your money
-					back.
+				<p className="mt-5 max-w-xl text-lg text-muted">
+					Watch a real video of the room before you pay anyone. Lock it down for{" "}
+					{naira(LOCK_FEE)}. If the room doesn't match the video when you
+					arrive, you get your money back.
 				</p>
+				{all.length > 0 && (
+					<p className="mt-5 text-sm text-ink">
+						<span className="font-semibold">{all.length}</span> rooms listed
+						<span className="mx-2 text-muted">/</span>
+						from <span className="font-semibold">{naira(cheapest)}</span> a
+						session
+					</p>
+				)}
 			</section>
+
+			<ul className="mt-8 grid grid-cols-3 gap-2 sm:gap-3">
+				<Pledge
+					icon={<PlayIcon />}
+					title="Video walkthroughs"
+					text="See the actual room, filmed on site."
+				/>
+				<Pledge
+					icon={<LockIcon />}
+					title={`${naira(LOCK_FEE)} lock`}
+					text={`Takes the room off the market for ${LOCK_HOURS} hours.`}
+				/>
+				<Pledge
+					icon={<ShieldIcon />}
+					title="Money-back promise"
+					text="Full refund if it doesn't match the video."
+				/>
+			</ul>
 
 			<Filters filters={filters} amenities={amenityOptions(all)} view={view} />
 
@@ -92,7 +122,7 @@ export default async function HomePage({
 				<p className="text-sm text-muted">
 					{hostels.length} {hostels.length === 1 ? "room" : "rooms"}
 				</p>
-				<div className="flex rounded-lg border border-line bg-card p-0.5 text-sm">
+				<div className="flex rounded-xl border border-line bg-card p-1 text-sm">
 					<ViewTab
 						href={withView(query, "list")}
 						label="List"
@@ -107,7 +137,7 @@ export default async function HomePage({
 			</div>
 
 			{hostels.length === 0 ? (
-				<p className="mt-8 text-muted">
+				<p className="panel mt-4 p-6 text-muted">
 					No rooms match those filters. Try a higher rent or fewer must-haves.
 				</p>
 			) : view === "map" ? (
@@ -121,7 +151,7 @@ export default async function HomePage({
 					)}
 				</div>
 			) : (
-				<ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+				<ul className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
 					{hostels.map((h) => (
 						<li key={h.id}>
 							<HostelCard hostel={h} saved={savedIds.includes(h.id)} />
@@ -130,6 +160,30 @@ export default async function HomePage({
 				</ul>
 			)}
 		</>
+	);
+}
+
+function Pledge({
+	icon,
+	title,
+	text,
+}: {
+	icon: React.ReactNode;
+	title: string;
+	text: string;
+}) {
+	return (
+		<li className="panel flex flex-col items-start gap-2.5 p-3 sm:flex-row sm:items-center sm:gap-3 sm:p-3.5">
+			<span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-brand-glow sm:size-10">
+				{icon}
+			</span>
+			<span>
+				<span className="block text-[0.8125rem] font-semibold leading-snug sm:text-sm">
+					{title}
+				</span>
+				<span className="hidden text-sm text-muted sm:block">{text}</span>
+			</span>
+		</li>
 	);
 }
 
@@ -146,8 +200,8 @@ function ViewTab({
 		<Link
 			href={href}
 			aria-current={active ? "page" : undefined}
-			className={`rounded-md px-4 py-1.5 ${
-				active ? "bg-brand text-white" : "text-muted hover:text-ink"
+			className={`rounded-lg px-4 py-1.5 font-medium ${
+				active ? "bg-brand-strong text-white" : "text-muted hover:text-ink"
 			}`}
 		>
 			{label}

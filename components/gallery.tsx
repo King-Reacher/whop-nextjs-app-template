@@ -17,7 +17,7 @@ export function Gallery({ photos, name }: { photos: string[]; name: string }) {
 						height={480}
 						sizes="(min-width: 640px) 320px, 80vw"
 						priority={i === 0}
-						className="aspect-[4/3] w-full rounded-lg object-cover"
+						className="aspect-[4/3] w-full rounded-xl border border-line object-cover"
 					/>
 				</li>
 			))}

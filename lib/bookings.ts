@@ -35,7 +35,7 @@ store.__solonBookings ??= new Map();
 const memory = store.__solonBookings;
 
 export function newReference(): string {
-	return `SLN-${randomBytes(6).toString("hex").toUpperCase()}`;
+	return `HS-${randomBytes(6).toString("hex").toUpperCase()}`;
 }
 
 export async function createBooking(booking: Booking): Promise<Booking> {
@@ -54,7 +54,7 @@ export async function createBooking(booking: Booking): Promise<Booking> {
 }
 
 export async function getBooking(reference: string): Promise<Booking | null> {
-	if (!/^SLN-[0-9A-F]{12}$/.test(reference)) return null;
+	if (!/^HS-[0-9A-F]{12}$/.test(reference)) return null;
 	if (!hasDatabase) return memory.get(reference) ?? null;
 	const rows = await db<Booking[]>(
 		`bookings?reference=eq.${reference}&select=*`,

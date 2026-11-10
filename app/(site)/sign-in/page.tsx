@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Monogram } from "@/components/brand";
 import { redirect } from "next/navigation";
 import { BRAND } from "@/lib/config";
 import { currentStudent, safeNext } from "@/lib/session";
@@ -23,17 +24,15 @@ export default async function SignInPage({
 
 	return (
 		<div className="mx-auto max-w-md">
-			<h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
+			<Monogram size={48} />
+			<h1 className="display mt-5 text-4xl">Sign in</h1>
 			<p className="mt-2 text-muted">
 				Enter your phone number and we'll text you a 6-digit code. No password
 				needed. You only need an account to save rooms on {BRAND.name}.
 			</p>
 
 			{error && ERRORS[error] && (
-				<p
-					role="alert"
-					className="mt-5 rounded-lg border border-danger/30 bg-danger/5 px-4 py-3 text-sm text-danger"
-				>
+				<p role="alert" className="alert mt-5">
 					{ERRORS[error]}
 				</p>
 			)}
@@ -49,13 +48,10 @@ export default async function SignInPage({
 						required
 						autoComplete="tel"
 						placeholder="0803 123 4567"
-						className="mt-1 block w-full rounded-lg border border-line bg-white px-3 py-2.5 text-base"
+						className="field"
 					/>
 				</label>
-				<button
-					type="submit"
-					className="w-full rounded-lg bg-brand px-4 py-3 font-medium text-white hover:bg-brand-deep"
-				>
+				<button type="submit" className="btn btn-primary w-full">
 					Text me a code
 				</button>
 			</form>

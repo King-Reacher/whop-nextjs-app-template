@@ -1,8 +1,19 @@
-# Solon: verified student hostels near FUNAAB
+# Heinrich & Solon Residences
 
-The Week 1 MVP of the Heinrich & Solon Group student housing platform. It lives
+Verified student hostels near FUNAAB, by Heinrich & Solon Group. The site lives
 in the `app/(site)` route group; the original Whop app template is untouched in
 `app/(whop)` and is documented further down.
+
+## Brand and look
+
+- The name, descriptor ("Residences") and short name ("H&S") are set in `BRAND`
+  in `lib/config.ts`.
+- Colours, the button gradient and the shared styles (`.panel`, `.btn`,
+  `.field`, `.chip`) are in `app/(site)/site.css`. The theme is near-black with
+  a violet to fuchsia accent.
+- Headings and the wordmark use Cormorant Garamond, self-hosted through
+  `next/font`. Everything else uses the phone's system font to stay light.
+- On phones the main navigation is a tab bar pinned to the bottom of the screen.
 
 ## What's built
 

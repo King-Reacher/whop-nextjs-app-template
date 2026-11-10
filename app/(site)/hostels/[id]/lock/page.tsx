@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { LOCK_FEE, LOCK_HOURS } from "@/lib/config";
+import { ArrowLeftIcon } from "@/components/icons";
 import { installmentPlan, naira } from "@/lib/format";
 import { getHostel } from "@/lib/hostels";
 import { hasPayments } from "@/lib/paystack";
@@ -21,8 +22,7 @@ const ERRORS: Record<string, string> = {
 	taken: "Another student just locked this room.",
 };
 
-const field =
-	"mt-1 block w-full rounded-lg border border-line bg-white px-3 py-2.5 text-base";
+const field = "field";
 
 export default async function LockPage({
 	params,
@@ -43,22 +43,19 @@ export default async function LockPage({
 		<div className="mx-auto max-w-md">
 			<Link
 				href={`/hostels/${hostel.id}`}
-				className="text-sm text-muted hover:text-ink"
+				className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-ink"
 			>
-				← {hostel.name}
+				<ArrowLeftIcon width={16} height={16} />
+				{hostel.name}
 			</Link>
-			<h1 className="mt-4 text-2xl font-semibold tracking-tight">
-				Lock down this room
-			</h1>
+			<p className="eyebrow mt-6">Reserve</p>
+			<h1 className="display mt-2 text-4xl">Lock down this room</h1>
 			<p className="mt-2 text-muted">
 				{hostel.name}, {hostel.area} · {naira(hostel.rent_price)} / session
 			</p>
 
 			{error && ERRORS[error] && (
-				<p
-					role="alert"
-					className="mt-5 rounded-lg border border-danger/30 bg-danger/5 px-4 py-3 text-sm text-danger"
-				>
+				<p role="alert" className="alert mt-5">
 					{ERRORS[error]}
 				</p>
 			)}
@@ -99,7 +96,7 @@ export default async function LockPage({
 					/>
 				</label>
 
-				<div className="group rounded-xl border border-line bg-card p-4">
+				<div className="panel group p-4">
 					<label className="flex items-start gap-3 text-sm">
 						<input
 							type="checkbox"
@@ -136,10 +133,7 @@ export default async function LockPage({
 					</div>
 				</div>
 
-				<button
-					type="submit"
-					className="w-full rounded-lg bg-brand px-4 py-3 font-medium text-white hover:bg-brand-deep"
-				>
+				<button type="submit" className="btn btn-primary w-full">
 					{hasPayments ? `Pay ${naira(LOCK_FEE)} to lock` : "Request this room"}
 				</button>
 				<p className="text-sm text-muted">

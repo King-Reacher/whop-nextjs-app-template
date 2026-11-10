@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Monogram } from "@/components/brand";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -29,22 +30,20 @@ export default async function VerifyPage({
 
 	return (
 		<div className="mx-auto max-w-md">
-			<h1 className="text-2xl font-semibold tracking-tight">Enter your code</h1>
+			<Monogram size={48} />
+			<h1 className="display mt-5 text-4xl">Enter your code</h1>
 			<p className="mt-2 text-muted">
 				We sent a 6-digit code to +{phone}. It expires in 10 minutes.
 			</p>
 
 			{demoCode && (
-				<p className="mt-5 rounded-lg bg-notice-soft px-4 py-3 text-sm text-notice">
+				<p className="note mt-5">
 					Demo mode: texting isn't set up, so your code is{" "}
 					<strong className="font-semibold tracking-widest">{demoCode}</strong>.
 				</p>
 			)}
 			{error === "code" && (
-				<p
-					role="alert"
-					className="mt-5 rounded-lg border border-danger/30 bg-danger/5 px-4 py-3 text-sm text-danger"
-				>
+				<p role="alert" className="alert mt-5">
 					That code is wrong or has expired.
 				</p>
 			)}
@@ -63,13 +62,10 @@ export default async function VerifyPage({
 						maxLength={6}
 						pattern="\d{6}"
 						title="The 6-digit code from the text"
-						className="mt-1 block w-full rounded-lg border border-line bg-white px-3 py-2.5 text-xl tracking-widest"
+						className="field !text-2xl tracking-[0.4em]"
 					/>
 				</label>
-				<button
-					type="submit"
-					className="w-full rounded-lg bg-brand px-4 py-3 font-medium text-white hover:bg-brand-deep"
-				>
+				<button type="submit" className="btn btn-primary w-full">
 					Sign in
 				</button>
 			</form>
