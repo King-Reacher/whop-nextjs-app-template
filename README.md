@@ -29,6 +29,7 @@ in the `app/(site)` route group; the original Whop app template is untouched in
 | `/bookings/[ref]` | Confirmation page. Verifies the payment with Paystack and hands off to WhatsApp. |
 | `/sign-in` | Sign in with a phone number and a 6-digit code sent by text. No passwords. Only needed to save rooms. |
 | `/saved` | A signed-in student's saved rooms and their bookings. |
+| `/app` | "Get the app": install button and step-by-step instructions for Android and iPhone. |
 | `/rent-index` | Average, lowest and highest rent per area, computed from the listings. |
 | `/api/paystack/webhook` | Signed Paystack webhook that marks a booking paid and takes the room off the market. |
 
@@ -70,11 +71,43 @@ banner, keeps bookings in memory and skips online payment. To go live, copy
    on screen in development and in the sample-data demo only. Once Supabase is
    connected in production, sign-in stays off until both are set.
 
-## Installing it like an app
+## The app
 
-The site ships a web app manifest and icons, so students can use "Add to Home
-screen" in Chrome or Safari and open it full-screen from an icon. There is no
-offline mode yet.
+The site is a full installable web app, so there is one codebase for the
+website, the phone app and (optionally) the Play Store listing.
+
+- **Install**: students see a "Get the app" card on the home page. On Android
+  it installs in one tap; on iPhone it explains Share, then Add to Home Screen.
+  `/app` has the same steps on one page for sharing in WhatsApp groups.
+- **Works on weak networks**: a service worker (`public/sw.js`) keeps fonts,
+  styles and scripts on the phone, and keeps a copy of public pages a student
+  has opened. Those still open with no signal; anything else shows `/offline`.
+  Pages with personal details (saved rooms, bookings, sign-in, the lock form)
+  are never stored on the phone.
+- **Feels like an app**: bottom tab bar, full screen with no browser bar, icon
+  shortcuts (Map, Saved, Rent index), a loading bar on tapped links, and a
+  Share button on each room that opens the phone's share sheet.
+- The service worker only runs in production builds (`pnpm build`, then
+  `pnpm exec next start`), never in `next dev`. Bump `VERSION` at the top of
+  `public/sw.js` to make every phone drop its stored copies.
+
+### Putting it on the Play Store
+
+The same app can be listed on Google Play as an Android app, with no rewrite:
+
+1. Deploy the site to its real domain over HTTPS.
+2. Go to [PWABuilder](https://www.pwabuilder.com), enter the domain and
+   generate the Android package. It gives you an app bundle to upload, a
+   package name and a SHA-256 fingerprint.
+3. Set `ANDROID_PACKAGE_NAME` and `ANDROID_SHA256_FINGERPRINTS` on the
+   deployment. The site then serves `/.well-known/assetlinks.json`, which is
+   what lets the Android app open full screen without a browser bar.
+4. Upload the bundle in the Google Play Console. This needs a Google Play
+   developer account, which has a one-time fee, and new personal accounts must
+   run a closed test before going public.
+
+The iPhone App Store does not accept this kind of package. iPhone users install
+from Safari, or you build a separate native app later.
 
 The map uses OpenStreetMap's public tile server, which is fine for a pilot. If
 traffic grows, switch the tile URL in `components/hostel-map.tsx` to a paid

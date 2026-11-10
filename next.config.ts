@@ -6,6 +6,24 @@ const nextConfig: NextConfig = {
 	images: {
 		remotePatterns: [{ hostname: "**" }],
 	},
+	async headers() {
+		return [
+			{
+				// Phones must always re-check the service worker so updates reach them.
+				source: "/sw.js",
+				headers: [
+					{
+						key: "Cache-Control",
+						value: "no-cache, no-store, must-revalidate",
+					},
+					{
+						key: "Content-Type",
+						value: "application/javascript; charset=utf-8",
+					},
+				],
+			},
+		];
+	},
 };
 
 export default withWhopAppConfig(nextConfig);

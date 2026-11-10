@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond } from "next/font/google";
 import Link from "next/link";
+import { ServiceWorker } from "@/components/app-install";
 import { Lockup, Wordmark } from "@/components/brand";
 import { TabBar } from "@/components/tab-bar";
 import { ThemePicker } from "@/components/theme-picker";
@@ -33,7 +34,11 @@ export const metadata: Metadata = {
 
 export async function generateViewport(): Promise<Viewport> {
 	const theme = await currentTheme();
-	return { themeColor: THEMES.find((t) => t.id === theme)?.chrome };
+	return {
+		themeColor: THEMES.find((t) => t.id === theme)?.chrome,
+		// Lets the page run under the phone's status bar and notch when installed.
+		viewportFit: "cover",
+	};
 }
 
 export default async function SiteLayout({
@@ -43,7 +48,7 @@ export default async function SiteLayout({
 
 	return (
 		<html lang="en" className={display.variable} data-theme={theme}>
-			<body className="flex min-h-dvh flex-col">
+			<body className="flex min-h-dvh flex-col pt-[env(safe-area-inset-top)]">
 				{usingSampleData && (
 					<p className="border-b border-notice/20 bg-notice-soft px-4 py-2 text-center text-xs text-notice">
 						Sample listings. These are placeholders, not real hostels.
@@ -77,10 +82,16 @@ export default async function SiteLayout({
 				<footer className="border-t border-line/70 pb-24 text-sm text-muted sm:pb-0">
 					<div className="mx-auto flex max-w-5xl flex-col gap-2 px-4 py-8 sm:flex-row sm:items-center sm:justify-between">
 						<Wordmark className="text-xl text-ink" />
-						<p>A {BRAND.parent} company.</p>
+						<p className="flex flex-wrap gap-x-5 gap-y-1">
+							<Link href="/app" className="text-brand-ink hover:underline">
+								Get the app
+							</Link>
+							<span>A {BRAND.parent} company.</span>
+						</p>
 					</div>
 				</footer>
 				<TabBar />
+				<ServiceWorker />
 			</body>
 		</html>
 	);

@@ -340,3 +340,40 @@ body {
 		0 0 0 2px var(--color-paper),
 		0 0 0 4px var(--color-brand);
 }
+
+/* Link loading indicator */
+
+.pending-bar {
+	position: absolute;
+	inset-inline: 0;
+	top: 0;
+	z-index: 5;
+	height: 3px;
+	overflow: hidden;
+	background: color-mix(in srgb, var(--color-brand) 30%, transparent);
+}
+
+.pending-bar::after {
+	content: "";
+	position: absolute;
+	inset-block: 0;
+	width: 40%;
+	background: var(--shine);
+	animation: pending-slide 0.9s ease-in-out infinite;
+}
+
+@keyframes pending-slide {
+	from {
+		transform: translateX(-100%);
+	}
+	to {
+		transform: translateX(250%);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.pending-bar::after {
+		width: 100%;
+		animation: none;
+	}
+}

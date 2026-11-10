@@ -3,9 +3,15 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChartIcon, HeartIcon, RoomsIcon } from "./icons";
+import { LinkPending } from "./link-pending";
 
 const TABS = [
-	{ href: "/", label: "Rooms", icon: RoomsIcon, match: /^\/($|hostels)/ },
+	{
+		href: "/",
+		label: "Rooms",
+		icon: RoomsIcon,
+		match: /^\/($|hostels|app|offline)/,
+	},
 	{
 		href: "/rent-index",
 		label: "Rent index",
@@ -36,10 +42,11 @@ export function TabBar() {
 							<Link
 								href={href}
 								aria-current={active ? "page" : undefined}
-								className={`flex flex-col items-center gap-1 py-2.5 text-[0.6875rem] font-medium ${
+								className={`relative flex flex-col items-center gap-1 py-2.5 text-[0.6875rem] font-medium ${
 									active ? "text-brand-glow" : "text-muted"
 								}`}
 							>
+								<LinkPending />
 								<TabIcon width={22} height={22} />
 								{label}
 							</Link>

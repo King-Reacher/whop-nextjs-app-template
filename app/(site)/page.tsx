@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { InstallCard } from "@/components/app-install";
+import { Monogram } from "@/components/brand";
 import { Filters } from "@/components/filters";
 import { HostelCard } from "@/components/hostel-card";
 import { HostelMap, type MapPin } from "@/components/hostel-map";
@@ -115,6 +117,20 @@ export default async function HomePage({
 					text="Full refund if it doesn't match the video."
 				/>
 			</ul>
+
+			<div className="mt-3 empty:hidden">
+				<InstallCard>
+					<Monogram size={44} />
+					<span>
+						<span className="block text-sm font-semibold">
+							Get the {BRAND.name} app
+						</span>
+						<span className="block text-sm text-muted">
+							Free, no app store, and it works on weak networks.
+						</span>
+					</span>
+				</InstallCard>
+			</div>
 
 			<Filters filters={filters} amenities={amenityOptions(all)} view={view} />
 

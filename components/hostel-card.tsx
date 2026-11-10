@@ -4,6 +4,7 @@ import { naira } from "@/lib/format";
 import type { Hostel } from "@/lib/hostels";
 import { CoverSeal, coverArt, VerifiedBadge } from "./hostel-bits";
 import { HeartIcon, PinIcon, WalkIcon } from "./icons";
+import { LinkPending } from "./link-pending";
 
 export function HostelCard({
 	hostel: h,
@@ -15,8 +16,9 @@ export function HostelCard({
 	return (
 		<Link
 			href={`/hostels/${h.id}`}
-			className="panel panel-link group block h-full overflow-hidden"
+			className="panel panel-link group relative block h-full overflow-hidden"
 		>
+			<LinkPending />
 			<div
 				className="relative aspect-[16/10]"
 				style={h.photos[0] ? undefined : coverArt(h.id)}

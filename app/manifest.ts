@@ -1,14 +1,17 @@
 import type { MetadataRoute } from "next";
 import { BRAND } from "@/lib/config";
 
-/** Lets students add the site to their home screen like an app. */
+/** Makes the site installable as an app, with its own icon and shortcuts. */
 export default function manifest(): MetadataRoute.Manifest {
 	return {
 		name: BRAND.full,
 		short_name: BRAND.short,
 		description: `Verified off-campus hostels around ${BRAND.campus}, ${BRAND.city}.`,
+		id: "/",
 		start_url: "/",
+		scope: "/",
 		display: "standalone",
+		orientation: "portrait",
 		background_color: "#09080d",
 		theme_color: "#09080d",
 		icons: [
@@ -20,6 +23,12 @@ export default function manifest(): MetadataRoute.Manifest {
 				type: "image/png",
 				purpose: "maskable",
 			},
+		],
+		// Long-press the app icon to jump straight to these.
+		shortcuts: [
+			{ name: "Map of rooms", short_name: "Map", url: "/?view=map" },
+			{ name: "Saved rooms", short_name: "Saved", url: "/saved" },
+			{ name: "Rent index", short_name: "Rent index", url: "/rent-index" },
 		],
 	};
 }

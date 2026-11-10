@@ -11,6 +11,7 @@ import {
 	PinIcon,
 	WalkIcon,
 } from "@/components/icons";
+import { ShareButton } from "@/components/share-button";
 import { BRAND, LOCK_FEE, LOCK_HOURS } from "@/lib/config";
 import { installmentPlan, naira, whatsappLink } from "@/lib/format";
 import { getHostel, listReviews } from "@/lib/hostels";
@@ -143,6 +144,11 @@ export default async function HostelPage({ params }: Props) {
 							Ask on WhatsApp
 						</a>
 					)}
+					<ShareButton
+						path={`/hostels/${hostel.id}`}
+						title={`${hostel.name}, ${hostel.area}`}
+						text={`${hostel.room_type} in ${hostel.area}, ${naira(hostel.rent_price)} a session. See the room on ${BRAND.full}:`}
+					/>
 					<form action={toggleSaved.bind(null, hostel.id, saved)}>
 						<button
 							type="submit"
