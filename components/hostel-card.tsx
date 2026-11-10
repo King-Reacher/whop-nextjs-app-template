@@ -33,7 +33,7 @@ export function HostelCard({
 				{!h.photos[0] && <CoverSeal />}
 				<div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20" />
 				<div className="absolute inset-x-3 top-3 flex items-start justify-between gap-2">
-					<VerifiedBadge hostel={h} />
+					<VerifiedBadge hostel={h} overlay />
 					{saved && (
 						<span className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-brand-strong">
 							<HeartIcon width={12} height={12} fill="currentColor" />

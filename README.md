@@ -14,6 +14,10 @@ in the `app/(site)` route group; the original Whop app template is untouched in
 - Headings and the wordmark use Cormorant Garamond, self-hosted through
   `next/font`. Everything else uses the phone's system font to stay light.
 - On phones the main navigation is a tab bar pinned to the bottom of the screen.
+- Three themes, picked with the colour dots in the header: Obsidian (black and
+  violet, the default), Pearl (white) and Amethyst (deep purple). The choice is
+  remembered in a cookie. Each theme is just a block of variables in
+  `site.css`, and the list of themes is in `lib/theme.ts`.
 
 ## What's built
 

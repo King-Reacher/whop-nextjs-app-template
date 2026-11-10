@@ -1,17 +1,42 @@
 import type { Hostel } from "@/lib/hostels";
 import { CheckIcon, PlayIcon } from "./icons";
 
-export function VerifiedBadge({ hostel }: { hostel: Hostel }) {
+/** `overlay` is for badges sitting on top of a cover image. */
+export function VerifiedBadge({
+	hostel,
+	overlay = false,
+}: {
+	hostel: Hostel;
+	overlay?: boolean;
+}) {
+	const base =
+		"inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs";
 	if (!hostel.verified_at) {
 		return (
-			<span className="rounded-full border border-white/15 bg-black/40 px-2.5 py-1 text-xs text-muted backdrop-blur">
+			<span
+				className={`${base} border ${
+					overlay
+						? "border-white/15 bg-black/40 text-white/75 backdrop-blur"
+						: "border-line text-muted"
+				}`}
+			>
 				Not yet visited
 			</span>
 		);
 	}
 	return (
-		<span className="inline-flex items-center gap-1 rounded-full border border-white/25 bg-black/45 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur">
-			<CheckIcon width={13} height={13} className="text-brand-glow" />
+		<span
+			className={`${base} border font-semibold ${
+				overlay
+					? "border-white/25 bg-black/45 text-white backdrop-blur"
+					: "border-brand/40 bg-brand-soft text-brand-ink"
+			}`}
+		>
+			<CheckIcon
+				width={13}
+				height={13}
+				className={overlay ? "text-[#c4a7ff]" : "text-brand-glow"}
+			/>
 			Verified
 		</span>
 	);
