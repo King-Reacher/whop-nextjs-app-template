@@ -30,6 +30,8 @@ in the `app/(site)` route group; the original Whop app template is untouched in
 | `/sign-in` | Sign in with a phone number and a 6-digit code sent by text. No passwords. Only needed to save rooms. |
 | `/saved` | A signed-in student's saved rooms and their bookings. |
 | `/app` | "Get the app": install button and step-by-step instructions for Android and iPhone. |
+| `/scout` | Scout tools: add a room from the hostel (photos, GPS location, agent's number) and see which submissions are live. |
+| `/admin` | Admin panel: review scout submissions, manage rooms, bookings, referral payouts and the team. |
 | `/rent-index` | Average, lowest and highest rent per area, computed from the listings. |
 | `/api/paystack/webhook` | Signed Paystack webhook that marks a booking paid and takes the room off the market. |
 
@@ -61,8 +63,8 @@ banner, keeps bookings in memory and skips online payment. To go live, copy
 
 1. **Supabase**: create a project, run `supabase/schema.sql`, set `SUPABASE_URL`
    and `SUPABASE_SERVICE_ROLE_KEY`, then add scouted hostels to the `hostels`
-   table. Set `verified_at` once a scout has physically visited, `lat` and `lng`
-   to put the room on the map, and `photos` to a list of image URLs.
+   table, or better, through the scout and admin tools described below. The
+   schema also creates the public `listings` storage bucket for room photos.
 2. **Paystack**: set `PAYSTACK_SECRET_KEY` and add a webhook pointing at
    `https://your-domain/api/paystack/webhook`.
 3. **WhatsApp**: set `NEXT_PUBLIC_WHATSAPP_NUMBER` (e.g. `2348012345678`).
@@ -113,17 +115,43 @@ The map uses OpenStreetMap's public tile server, which is fine for a pilot. If
 traffic grows, switch the tile URL in `components/hostel-map.tsx` to a paid
 provider.
 
-## Done by hand in Week 1
+## Running the business from the admin panel
 
-- Adding listings, videos, photos and map coordinates: straight into the
-  Supabase table.
-- Releasing or refunding a lock fee: Paystack dashboard, then update the
-  booking's `status` to `released` or `refunded` and the hostel's `is_available`.
-- Payment plans: the site only records the request and the KYC details. Nothing
-  is lent or charged automatically.
-- Affiliate payouts: query `bookings` by `affiliate_tag`.
-- Reviews: the table exists and reviews are displayed, but there is no
+Staff sign in the same way students do, with their phone number. What they see
+depends on their role.
+
+1. **Get in the first time**: set `ADMIN_PHONES` to your own number (several
+   numbers can be comma-separated). Those numbers are always admins. Sign in,
+   open the Saved tab and tap "Admin panel", or go to `/admin`.
+2. **Add scouts**: Admin, then Team. Enter a scout's phone number. They can
+   sign in straight away and will find "Scout tools" on their Saved tab.
+3. **Scouts add rooms** at `/scout/new`, standing at the hostel: details,
+   photos (shrunk on the phone before upload to save data), a tap for GPS
+   location, and the agent's number, which students never see.
+4. **You review**: new rooms wait under "Rooms to review". Approve publishes
+   the room and marks it verified; Reject hides it. Admins can also add or edit
+   any room directly under Rooms.
+5. **Bookings**: every lock request appears under Bookings with the student's
+   details. Payments made through Paystack are marked automatically. For a bank
+   transfer use "Mark as paid". "Student moved in" closes a booking; "Record
+   refund" puts the room back on the market.
+6. **Referral payouts**: the bottom of the Bookings page counts paid bookings
+   per referral tag.
+
+Still done outside the app:
+
+- **Refunds**: "Record refund" only updates the record. Send the money back in
+  the Paystack dashboard or by transfer first.
+- **Videos**: phone videos are too large to upload over campus data. Scouts
+  send them on WhatsApp; you host them (Mux, Cloudinary or similar) and paste
+  the link into the room's "Video link" field.
+- **Payment plans**: the app records the request and the student's details.
+  Nothing is lent or charged automatically.
+- **Reviews**: the table exists and reviews are displayed, but there is no
   submission form yet.
+
+Without Supabase, rooms, bookings, team members and uploaded photos are held in
+memory so the tools can be tried out. They reset when the server restarts.
 
 ---
 

@@ -6,7 +6,8 @@ export type BookingStatus =
 	| "pending_payment" // created, lock fee not yet confirmed
 	| "held" // lock fee received, room off the market
 	| "released" // student moved in, fee passed on / applied to rent
-	| "refunded"; // room did not match, fee returned
+	| "refunded" // room did not match, fee returned
+	| "cancelled"; // never paid, closed by staff
 
 export type PaymentPlan = "full" | "installment_requested";
 
@@ -106,5 +107,36 @@ export function statusLabel(status: BookingStatus, paymentsOn: boolean) {
 		held: "Room locked",
 		released: "Moved in",
 		refunded: "Refunded",
+		cancelled: "Cancelled",
 	}[status];
+}
+
+// Staff-only functions below. Callers must check the person's role first.
+
+export async function listBookings(): Promise<Booking[]> {
+	if (!hasDatabase) return [...memory.values()].reverse();
+	return db<Booking[]>("bookings?select=*&order=created_at.desc&limit=500");
+}
+
+/**
+ * Moves a booking to a new status, but only from one of the allowed current
+ * statuses. Returns the booking if it changed, or null if it did not.
+ */
+export async function moveBooking(
+	reference: string,
+	from: BookingStatus[],
+	to: BookingStatus,
+	patch: Partial<Booking> = {},
+): Promise<Booking | null> {
+	if (!hasDatabase) {
+		const booking = memory.get(reference);
+		if (!booking || !from.includes(booking.status)) return null;
+		Object.assign(booking, patch, { status: to });
+		return booking;
+	}
+	const rows = await db<Booking[]>(
+		`bookings?reference=eq.${reference}&status=in.(${from.join(",")})`,
+		{ method: "PATCH", body: JSON.stringify({ ...patch, status: to }) },
+	);
+	return rows[0] ?? null;
 }

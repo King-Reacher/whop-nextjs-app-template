@@ -29,7 +29,7 @@ create table if not exists bookings (
 	student_email   varchar(255) not null,
 	amount_paid     numeric not null default 0,
 	status          varchar(50) not null default 'pending_payment'
-		check (status in ('pending_payment', 'held', 'released', 'refunded')),
+		check (status in ('pending_payment', 'held', 'released', 'refunded', 'cancelled')),
 	plan            varchar(50) not null default 'full'
 		check (plan in ('full', 'installment_requested')),
 	matric_number   varchar(50),
@@ -90,3 +90,30 @@ create table if not exists saved_rooms (
 alter table students    enable row level security;
 alter table login_codes enable row level security;
 alter table saved_rooms enable row level security;
+
+-- Stage 3: scout submissions, staff roles and photo storage.
+
+-- Rooms added by scouts wait as 'pending' until an admin approves them.
+-- Rows you add by hand default to 'live'.
+alter table hostels add column if not exists status varchar(20) not null default 'live';
+do $$ begin
+	alter table hostels add constraint hostels_status_check
+		check (status in ('pending', 'live', 'rejected'));
+exception when duplicate_object then null; end $$;
+
+alter table students add column if not exists role varchar(20) not null default 'student';
+do $$ begin
+	alter table students add constraint students_role_check
+		check (role in ('student', 'scout', 'admin'));
+exception when duplicate_object then null; end $$;
+
+-- If you created the bookings table before 'cancelled' existed.
+alter table bookings drop constraint if exists bookings_status_check;
+alter table bookings add constraint bookings_status_check
+	check (status in ('pending_payment', 'held', 'released', 'refunded', 'cancelled'));
+
+-- Public bucket for room photos. Uploads go through one-time signed links
+-- issued to staff, so no storage policies are needed.
+insert into storage.buckets (id, name, public)
+values ('listings', 'listings', true)
+on conflict (id) do nothing;

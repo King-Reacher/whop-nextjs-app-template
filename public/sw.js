@@ -8,15 +8,16 @@
  *
  * Bump VERSION to make every phone drop its old caches.
  */
-const VERSION = "v1";
+const VERSION = "v2";
 const STATIC = `hs-static-${VERSION}`;
 const PAGES = `hs-pages-${VERSION}`;
 const IMAGES = `hs-images-${VERSION}`;
 const OFFLINE_URL = "/offline";
 const MAX_IMAGES = 60;
 
-// Pages that hold personal details are never stored on the phone.
-const PERSONAL = /^\/(saved|sign-in|bookings)(\/|$)|\/lock$/;
+// Pages that hold personal details, and the staff tools, are never stored
+// on the phone.
+const PERSONAL = /^\/(saved|sign-in|bookings|scout|admin)(\/|$)|\/lock$/;
 // Not part of the student app at all, so the worker leaves them alone.
 const IGNORED = /^\/(api|dashboard|experiences|discover|\.well-known)(\/|$)/;
 

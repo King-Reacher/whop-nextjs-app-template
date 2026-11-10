@@ -20,6 +20,19 @@ export type Hostel = {
 	is_available: boolean;
 };
 
+/** Scout submissions start as pending and only show publicly once live. */
+export type ListingStatus = "pending" | "live" | "rejected";
+
+/** A listing with the fields only staff may see. */
+export type HostelAdmin = Hostel & {
+	status: ListingStatus;
+	agent_phone: string | null;
+	scout_id: number | null;
+	created_at?: string;
+};
+
+export type HostelInput = Omit<HostelAdmin, "id" | "created_at">;
+
 export type Review = {
 	id: number;
 	rating: number;
@@ -161,25 +174,123 @@ const COLUMNS =
 /** True while the site is serving placeholder listings. */
 export const usingSampleData = !hasDatabase;
 
+// Without a database, listings live in memory so the scout and admin tools
+// can still be tried out. Kept on globalThis: see lib/bookings.ts.
+const store = globalThis as {
+	__hsHostels?: { rows: HostelAdmin[]; nextId: number };
+};
+store.__hsHostels ??= {
+	rows: SAMPLE_HOSTELS.map((h) => ({
+		...h,
+		status: "live" as const,
+		agent_phone: null,
+		scout_id: null,
+	})),
+	nextId: SAMPLE_HOSTELS.length + 1,
+};
+const memory = store.__hsHostels;
+
+/** Drops the staff-only fields before a listing goes anywhere public. */
+function toPublic(row: HostelAdmin): Hostel {
+	return {
+		id: row.id,
+		name: row.name,
+		area: row.area,
+		rent_price: row.rent_price,
+		room_type: row.room_type,
+		description: row.description,
+		amenities: row.amenities,
+		walk_minutes: row.walk_minutes,
+		video_url: row.video_url,
+		poster_url: row.poster_url,
+		photos: row.photos,
+		lat: row.lat,
+		lng: row.lng,
+		verified_at: row.verified_at,
+		is_available: row.is_available,
+	};
+}
+
+/** Live listings only. This is what students see. */
 export async function listHostels(): Promise<Hostel[]> {
-	if (!hasDatabase) return SAMPLE_HOSTELS;
-	return db<Hostel[]>(`hostels?select=${COLUMNS}&order=rent_price.asc`, {
-		revalidate: 60,
-	});
+	if (!hasDatabase) {
+		return memory.rows
+			.filter((h) => h.status === "live")
+			.map(toPublic)
+			.sort((a, b) => a.rent_price - b.rent_price);
+	}
+	return db<Hostel[]>(
+		`hostels?select=${COLUMNS}&status=eq.live&order=rent_price.asc`,
+	);
 }
 
 export async function getHostel(id: number): Promise<Hostel | null> {
 	if (!Number.isInteger(id)) return null;
-	if (!hasDatabase) return SAMPLE_HOSTELS.find((h) => h.id === id) ?? null;
-	const rows = await db<Hostel[]>(`hostels?id=eq.${id}&select=${COLUMNS}`);
+	if (!hasDatabase) {
+		const row = memory.rows.find((h) => h.id === id && h.status === "live");
+		return row ? toPublic(row) : null;
+	}
+	const rows = await db<Hostel[]>(
+		`hostels?id=eq.${id}&status=eq.live&select=${COLUMNS}`,
+	);
 	return rows[0] ?? null;
 }
 
 export async function setHostelAvailability(id: number, available: boolean) {
-	if (!hasDatabase) return;
+	await updateHostel(id, { is_available: available });
+}
+
+// Staff-only functions below. Callers must check the person's role first.
+
+export async function listAllHostels(): Promise<HostelAdmin[]> {
+	if (!hasDatabase) return [...memory.rows].reverse();
+	return db<HostelAdmin[]>("hostels?select=*&order=created_at.desc");
+}
+
+export async function listHostelsByScout(
+	scoutId: number,
+): Promise<HostelAdmin[]> {
+	if (!hasDatabase) {
+		return memory.rows.filter((h) => h.scout_id === scoutId).reverse();
+	}
+	return db<HostelAdmin[]>(
+		`hostels?scout_id=eq.${scoutId}&select=*&order=created_at.desc`,
+	);
+}
+
+export async function getHostelAdmin(id: number): Promise<HostelAdmin | null> {
+	if (!Number.isInteger(id)) return null;
+	if (!hasDatabase) return memory.rows.find((h) => h.id === id) ?? null;
+	const rows = await db<HostelAdmin[]>(`hostels?id=eq.${id}&select=*`);
+	return rows[0] ?? null;
+}
+
+export async function createHostel(input: HostelInput): Promise<HostelAdmin> {
+	if (!hasDatabase) {
+		const row: HostelAdmin = {
+			...input,
+			id: memory.nextId++,
+			created_at: new Date().toISOString(),
+		};
+		memory.rows.push(row);
+		return row;
+	}
+	const rows = await db<HostelAdmin[]>("hostels", {
+		method: "POST",
+		body: JSON.stringify(input),
+	});
+	return rows[0];
+}
+
+export async function updateHostel(id: number, patch: Partial<HostelInput>) {
+	if (!hasDatabase) {
+		const row = memory.rows.find((h) => h.id === id);
+		if (row) Object.assign(row, patch);
+		return;
+	}
 	await db(`hostels?id=eq.${id}`, {
 		method: "PATCH",
-		body: JSON.stringify({ is_available: available }),
+		body: JSON.stringify(patch),
 	});
 }
 

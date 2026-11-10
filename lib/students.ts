@@ -2,7 +2,14 @@ import "server-only";
 import { createHmac, randomInt, timingSafeEqual } from "node:crypto";
 import { db, hasDatabase } from "./supabase";
 
-export type Student = { id: number; phone: string; name: string | null };
+export type Role = "student" | "scout" | "admin";
+
+export type Student = {
+	id: number;
+	phone: string;
+	name: string | null;
+	role: Role;
+};
 
 type LoginCode = {
 	id: number;
@@ -131,7 +138,7 @@ export async function findOrCreateStudent(phone: string): Promise<Student> {
 	if (!hasDatabase) {
 		let student = memory.students.find((s) => s.phone === phone);
 		if (!student) {
-			student = { id: memory.nextId++, phone, name: null };
+			student = { id: memory.nextId++, phone, name: null, role: "student" };
 			memory.students.push(student);
 		}
 		return student;
@@ -146,7 +153,9 @@ export async function findOrCreateStudent(phone: string): Promise<Student> {
 
 export async function getStudentById(id: number): Promise<Student | null> {
 	if (!hasDatabase) return memory.students.find((s) => s.id === id) ?? null;
-	const rows = await db<Student[]>(`students?id=eq.${id}&select=id,phone,name`);
+	const rows = await db<Student[]>(
+		`students?id=eq.${id}&select=id,phone,name,role`,
+	);
 	return rows[0] ?? null;
 }
 
@@ -179,5 +188,33 @@ export async function unsaveRoom(studentId: number, hostelId: number) {
 	}
 	await db(`saved_rooms?student_id=eq.${studentId}&hostel_id=eq.${hostelId}`, {
 		method: "DELETE",
+	});
+}
+
+/** Scouts and admins, for the team page. */
+export async function listStaff(): Promise<Student[]> {
+	if (!hasDatabase) {
+		return memory.students.filter((s) => s.role !== "student");
+	}
+	return db<Student[]>(
+		"students?role=in.(scout,admin)&select=id,phone,name,role&order=role.asc",
+	);
+}
+
+/**
+ * Gives a phone number a role. Creates the account if that person has not
+ * signed in yet, so a scout can be approved before their first visit.
+ */
+export async function setRoleByPhone(phone: string, role: Role, name?: string) {
+	if (!hasDatabase) {
+		const student = await findOrCreateStudent(phone);
+		student.role = role;
+		if (name) student.name = name;
+		return;
+	}
+	await db("students?on_conflict=phone", {
+		method: "POST",
+		headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
+		body: JSON.stringify(name ? { phone, role, name } : { phone, role }),
 	});
 }

@@ -6,6 +6,7 @@ import { listBookingsByPhone, statusLabel } from "@/lib/bookings";
 import { getHostels } from "@/lib/hostels";
 import { hasPayments } from "@/lib/paystack";
 import { currentStudent } from "@/lib/session";
+import { roleOf } from "@/lib/staff";
 import { listSavedIds } from "@/lib/students";
 import { signOut } from "../actions";
 
@@ -23,6 +24,7 @@ export default async function SavedPage() {
 		listBookingsByPhone(student.phone),
 	]);
 	const saved = await getHostels(savedIds);
+	const role = roleOf(student);
 
 	return (
 		<>
@@ -39,6 +41,19 @@ export default async function SavedPage() {
 					</button>
 				</form>
 			</div>
+
+			{role !== "student" && (
+				<div className="mt-5 flex flex-wrap gap-2">
+					<Link href="/scout" className="btn btn-ghost !py-2 text-sm">
+						Scout tools
+					</Link>
+					{role === "admin" && (
+						<Link href="/admin" className="btn btn-ghost !py-2 text-sm">
+							Admin panel
+						</Link>
+					)}
+				</div>
+			)}
 
 			{saved.length === 0 ? (
 				<p className="panel mt-8 p-6 text-muted">

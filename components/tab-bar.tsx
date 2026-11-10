@@ -22,7 +22,7 @@ const TABS = [
 		href: "/saved",
 		label: "Saved",
 		icon: HeartIcon,
-		match: /^\/(saved|sign-in|bookings)/,
+		match: /^\/(saved|sign-in|bookings|scout|admin)/,
 	},
 ];
 
