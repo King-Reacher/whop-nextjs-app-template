@@ -1,4 +1,4 @@
--- Solon — Week 1 schema. Run this in the Supabase SQL editor.
+-- Solon schema. Run this in the Supabase SQL editor.
 -- The site reads and writes with the service-role key from the server only,
 -- so row level security is enabled with no public policies.
 
@@ -54,3 +54,39 @@ create table if not exists reviews (
 alter table hostels  enable row level security;
 alter table bookings enable row level security;
 alter table reviews  enable row level security;
+
+-- Stage 2: map locations, photo galleries, student accounts and saved rooms.
+
+alter table hostels add column if not exists lat double precision;
+alter table hostels add column if not exists lng double precision;
+alter table hostels add column if not exists photos text[] not null default '{}';
+
+create table if not exists students (
+	id          serial primary key,
+	phone       varchar(20) not null unique,       -- 234XXXXXXXXXX
+	name        varchar(255),
+	created_at  timestamptz not null default now()
+);
+
+-- One-time sign-in codes. Only a hash of the code is stored.
+create table if not exists login_codes (
+	id          serial primary key,
+	phone       varchar(20) not null,
+	code_hash   varchar(64) not null,
+	attempts    int not null default 0,
+	expires_at  timestamptz not null,
+	created_at  timestamptz not null default now()
+);
+
+create index if not exists login_codes_phone_idx on login_codes (phone, created_at);
+
+create table if not exists saved_rooms (
+	student_id  int not null references students(id) on delete cascade,
+	hostel_id   int not null references hostels(id) on delete cascade,
+	created_at  timestamptz not null default now(),
+	primary key (student_id, hostel_id)
+);
+
+alter table students    enable row level security;
+alter table login_codes enable row level security;
+alter table saved_rooms enable row level security;

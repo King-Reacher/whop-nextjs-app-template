@@ -5,8 +5,10 @@ import { usingSampleData } from "@/lib/hostels";
 import "./site.css";
 
 export const metadata: Metadata = {
+	appleWebApp: { capable: true, title: BRAND.name },
+	icons: { apple: "/icon-192.png" },
 	title: {
-		default: `${BRAND.name} — verified hostels near ${BRAND.campus}`,
+		default: `${BRAND.name}: verified hostels near ${BRAND.campus}`,
 		template: `%s · ${BRAND.name}`,
 	},
 	description: `Watch a real video of the room, lock it down, and move in. Verified off-campus hostels around ${BRAND.campus}, ${BRAND.city}.`,
@@ -24,7 +26,7 @@ export default function SiteLayout({
 			<body className="min-h-dvh flex flex-col">
 				{usingSampleData && (
 					<p className="bg-notice-soft text-notice text-sm text-center px-4 py-2">
-						Sample listings — these are placeholders, not real hostels.
+						Sample listings. These are placeholders, not real hostels.
 					</p>
 				)}
 				<header className="border-b border-line">
@@ -39,6 +41,9 @@ export default function SiteLayout({
 							</Link>
 							<Link href="/rent-index" className="hover:text-ink">
 								Rent index
+							</Link>
+							<Link href="/saved" className="hover:text-ink">
+								Saved
 							</Link>
 						</nav>
 					</div>

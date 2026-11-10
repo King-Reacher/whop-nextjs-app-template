@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getBooking } from "@/lib/bookings";
+import { getBooking, statusLabel } from "@/lib/bookings";
 import { BRAND, LOCK_HOURS } from "@/lib/config";
 import { naira, whatsappLink } from "@/lib/format";
 import { getHostel } from "@/lib/hostels";
@@ -22,7 +22,7 @@ export default async function BookingPage({
 	if (!booking) notFound();
 
 	// The student usually lands here straight from Paystack, sometimes before
-	// the webhook arrives — so check with Paystack directly.
+	// the webhook arrives, so check with Paystack directly.
 	if (booking.status === "pending_payment") {
 		try {
 			const paid = await confirmPayment(booking.reference, booking.hostel_id);
@@ -46,12 +46,10 @@ export default async function BookingPage({
 		<div className="mx-auto max-w-md">
 			<p
 				className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${
-					paid
-						? "bg-brand-soft text-brand-deep"
-						: "bg-notice-soft text-notice"
+					paid ? "bg-brand-soft text-brand-deep" : "bg-notice-soft text-notice"
 				}`}
 			>
-				{STATUS_LABEL[booking.status]}
+				{statusLabel(booking.status, hasPayments)}
 			</p>
 			<h1 className="mt-4 text-2xl font-semibold tracking-tight">
 				{paid ? "The room is yours to inspect" : "Almost there"}
@@ -60,7 +58,7 @@ export default async function BookingPage({
 				{paid
 					? `${hostelName} is off the market for the next ${LOCK_HOURS} hours. Message us to arrange your visit and collect the keys.`
 					: hasPayments
-						? `We haven't received payment for ${hostelName} yet. If you were charged, this page will update in a moment — otherwise message us and we'll sort it out.`
+						? `We haven't received payment for ${hostelName} yet. If you were charged, this page will update in a moment. Otherwise message us and we'll sort it out.`
 						: `We've got your request for ${hostelName}. Online payment isn't switched on yet, so message us to complete the lock.`}
 			</p>
 
@@ -69,7 +67,7 @@ export default async function BookingPage({
 				<Row label="Hostel" value={hostelName} />
 				<Row label="Paid" value={naira(booking.amount_paid)} />
 				{booking.plan === "installment_requested" && (
-					<Row label="Payment plan" value="Requested — under review" />
+					<Row label="Payment plan" value="Requested, under review" />
 				)}
 			</dl>
 
@@ -82,7 +80,7 @@ export default async function BookingPage({
 				</a>
 			) : (
 				<p className="mt-6 text-sm text-muted">
-					Keep your reference safe — the {BRAND.name} team will contact you on
+					Keep your reference safe. The {BRAND.name} team will contact you on
 					the number you gave.
 				</p>
 			)}
@@ -95,13 +93,6 @@ export default async function BookingPage({
 		</div>
 	);
 }
-
-const STATUS_LABEL = {
-	pending_payment: hasPayments ? "Awaiting payment" : "Request received",
-	held: "Room locked",
-	released: "Moved in",
-	refunded: "Refunded",
-} as const;
 
 function Row({ label, value }: { label: string; value: string }) {
 	return (

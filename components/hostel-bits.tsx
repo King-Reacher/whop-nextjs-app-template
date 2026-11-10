@@ -23,7 +23,7 @@ export function Walkthrough({ hostel }: { hostel: Hostel }) {
 				className="aspect-video w-full rounded-xl bg-ink object-cover"
 				controls
 				playsInline
-				// Nothing downloads until the student presses play — data is precious.
+				// Nothing downloads until the student presses play, to save their data.
 				preload="none"
 				poster={hostel.poster_url ?? undefined}
 			>

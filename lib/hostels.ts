@@ -13,6 +13,9 @@ export type Hostel = {
 	walk_minutes: number | null;
 	video_url: string | null;
 	poster_url: string | null;
+	photos: string[];
+	lat: number | null;
+	lng: number | null;
 	verified_at: string | null;
 	is_available: boolean;
 };
@@ -25,12 +28,15 @@ export type Review = {
 
 /**
  * Placeholder listings so the site runs before any real data exists. These
- * are NOT real hostels — the UI shows a "sample data" banner while they are
- * in use. Replace them by connecting Supabase and loading scouted listings.
+ * are NOT real hostels. The UI shows a "sample data" banner while they are
+ * in use, and the map coordinates are rough guesses. Replace them by connecting Supabase and loading scouted listings.
  */
 const SAMPLE_HOSTELS: Hostel[] = [
 	{
 		id: 1,
+		photos: [],
+		lat: 7.2012,
+		lng: 3.4368,
 		name: "Sample Lodge A",
 		area: "Camp",
 		rent_price: 250_000,
@@ -46,6 +52,9 @@ const SAMPLE_HOSTELS: Hostel[] = [
 	},
 	{
 		id: 2,
+		photos: [],
+		lat: 7.1987,
+		lng: 3.4402,
 		name: "Sample Lodge B",
 		area: "Camp",
 		rent_price: 180_000,
@@ -60,6 +69,9 @@ const SAMPLE_HOSTELS: Hostel[] = [
 	},
 	{
 		id: 3,
+		photos: [],
+		lat: 7.2038,
+		lng: 3.4391,
 		name: "Sample Villa C",
 		area: "Camp",
 		rent_price: 400_000,
@@ -74,6 +86,9 @@ const SAMPLE_HOSTELS: Hostel[] = [
 	},
 	{
 		id: 4,
+		photos: [],
+		lat: 7.1921,
+		lng: 3.4465,
 		name: "Sample Court D",
 		area: "Oluwo",
 		rent_price: 220_000,
@@ -88,6 +103,9 @@ const SAMPLE_HOSTELS: Hostel[] = [
 	},
 	{
 		id: 5,
+		photos: [],
+		lat: 7.1898,
+		lng: 3.4502,
 		name: "Sample Court E",
 		area: "Oluwo",
 		rent_price: 350_000,
@@ -102,6 +120,9 @@ const SAMPLE_HOSTELS: Hostel[] = [
 	},
 	{
 		id: 6,
+		photos: [],
+		lat: 7.2094,
+		lng: 3.4298,
 		name: "Sample House F",
 		area: "Isolu",
 		rent_price: 150_000,
@@ -116,6 +137,9 @@ const SAMPLE_HOSTELS: Hostel[] = [
 	},
 	{
 		id: 7,
+		photos: [],
+		lat: 7.2071,
+		lng: 3.4334,
 		name: "Sample House G",
 		area: "Isolu",
 		rent_price: 280_000,
@@ -132,7 +156,7 @@ const SAMPLE_HOSTELS: Hostel[] = [
 
 // agent_phone is deliberately left out so it can never reach the browser.
 const COLUMNS =
-	"id,name,area,rent_price,room_type,description,amenities,walk_minutes,video_url,poster_url,verified_at,is_available";
+	"id,name,area,rent_price,room_type,description,amenities,walk_minutes,video_url,poster_url,photos,lat,lng,verified_at,is_available";
 
 /** True while the site is serving placeholder listings. */
 export const usingSampleData = !hasDatabase;
@@ -193,4 +217,47 @@ export function rentByArea(hostels: Hostel[]): AreaStats[] {
 			max: Math.max(...rents),
 		}))
 		.sort((a, b) => a.average - b.average);
+}
+
+export type HostelFilters = {
+	area?: string;
+	type?: string;
+	maxRent?: number;
+	maxWalk?: number;
+	amenities: string[];
+	sort: "low" | "high";
+};
+
+export function filterHostels(all: Hostel[], f: HostelFilters): Hostel[] {
+	const wanted = f.amenities.map((a) => a.toLowerCase());
+	const matches = all.filter((h) => {
+		if (f.area && h.area !== f.area) return false;
+		if (f.type && h.room_type !== f.type) return false;
+		if (f.maxRent && Number(h.rent_price) > f.maxRent) return false;
+		if (f.maxWalk && (h.walk_minutes === null || h.walk_minutes > f.maxWalk))
+			return false;
+		const has = h.amenities.map((a) => a.toLowerCase());
+		return wanted.every((a) => has.includes(a));
+	});
+	const direction = f.sort === "high" ? -1 : 1;
+	return matches.sort(
+		(a, b) => (Number(a.rent_price) - Number(b.rent_price)) * direction,
+	);
+}
+
+/** Every amenity that appears on at least one listing, most common first. */
+export function amenityOptions(all: Hostel[]): string[] {
+	const counts = new Map<string, number>();
+	for (const h of all)
+		for (const a of h.amenities) counts.set(a, (counts.get(a) ?? 0) + 1);
+	return [...counts.entries()]
+		.sort((a, b) => b[1] - a[1])
+		.slice(0, 8)
+		.map(([a]) => a);
+}
+
+export async function getHostels(ids: number[]): Promise<Hostel[]> {
+	if (ids.length === 0) return [];
+	const all = await listHostels();
+	return all.filter((h) => ids.includes(h.id));
 }

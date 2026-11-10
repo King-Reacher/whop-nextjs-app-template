@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+/* biome-ignore lint/suspicious/noUnknownAtRules: Tailwind v4 directive */
 @theme {
 	--color-paper: #f6f4ee;
 	--color-card: #fffdf8;
@@ -26,4 +27,21 @@ body {
 :focus-visible {
 	outline: 2px solid var(--color-brand);
 	outline-offset: 2px;
+}
+
+.price-pin {
+	position: absolute;
+	transform: translate(-50%, -50%);
+	white-space: nowrap;
+	border-radius: 999px;
+	border: 2px solid #fff;
+	background: var(--color-brand);
+	padding: 2px 8px;
+	font: 600 12px var(--font-sans);
+	color: #fff;
+	box-shadow: 0 1px 4px rgb(0 0 0 / 0.3);
+}
+
+.price-pin-taken {
+	background: var(--color-muted);
 }

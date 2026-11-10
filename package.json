@@ -12,6 +12,7 @@
 		"@vercel/functions": "^3.1.4",
 		"@whop/react": "0.3.0",
 		"@whop/sdk": "0.0.3",
+		"leaflet": "^1.9.4",
 		"next": "16.1.1",
 		"react": "19.2.0",
 		"react-dom": "19.2.0",
@@ -20,6 +21,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "2.2.6",
 		"@tailwindcss/postcss": "^4.1.14",
+		"@types/leaflet": "^1.9.22",
 		"@types/node": "^20.19.21",
 		"@types/react": "19.2.2",
 		"@types/react-dom": "19.2.2",

@@ -4,7 +4,7 @@ import { confirmPayment, isValidSignature } from "@/lib/paystack";
 
 /**
  * Paystack webhook. Set the URL to /api/paystack/webhook in the Paystack
- * dashboard. This is the reliable path for confirming payment — the redirect
+ * dashboard. This is the reliable path for confirming payment. The redirect
  * back to the confirmation page can be lost on a bad network.
  */
 export async function POST(request: NextRequest): Promise<Response> {

@@ -5,6 +5,7 @@ import { LOCK_FEE, LOCK_HOURS } from "@/lib/config";
 import { installmentPlan, naira } from "@/lib/format";
 import { getHostel } from "@/lib/hostels";
 import { hasPayments } from "@/lib/paystack";
+import { currentStudent } from "@/lib/session";
 import { lockRoom } from "./actions";
 
 export const metadata: Metadata = { title: "Lock down room" };
@@ -12,10 +13,11 @@ export const metadata: Metadata = { title: "Lock down room" };
 const ERRORS: Record<string, string> = {
 	name: "Enter your full name.",
 	phone: "Enter a valid Nigerian phone number, like 0803 123 4567.",
-	email: "Enter a valid email address — your receipt goes there.",
+	email: "Enter a valid email address. Your receipt goes there.",
 	installments:
 		"For the payment plan we need your matric number and a guarantor's name and valid phone number.",
-	payment: "We couldn't start the payment. Nothing was charged — try again.",
+	payment:
+		"We couldn't start the payment. Nothing was charged, so please try again.",
 	taken: "Another student just locked this room.",
 };
 
@@ -35,6 +37,7 @@ export default async function LockPage({
 
 	const { error } = await searchParams;
 	const plan = installmentPlan(hostel.rent_price);
+	const student = await currentStudent();
 
 	return (
 		<div className="mx-auto max-w-md">
@@ -67,6 +70,7 @@ export default async function LockPage({
 						name="name"
 						required
 						autoComplete="name"
+						defaultValue={student?.name ?? ""}
 						className={field}
 					/>
 				</label>
@@ -78,6 +82,7 @@ export default async function LockPage({
 						required
 						autoComplete="tel"
 						placeholder="0803 123 4567"
+						defaultValue={student ? `0${student.phone.slice(3)}` : ""}
 						pattern="[\d\s+\(\)\-]{11,17}"
 						title="A Nigerian phone number, like 0803 123 4567"
 						className={field}
@@ -135,9 +140,7 @@ export default async function LockPage({
 					type="submit"
 					className="w-full rounded-lg bg-brand px-4 py-3 font-medium text-white hover:bg-brand-deep"
 				>
-					{hasPayments
-						? `Pay ${naira(LOCK_FEE)} to lock`
-						: "Request this room"}
+					{hasPayments ? `Pay ${naira(LOCK_FEE)} to lock` : "Request this room"}
 				</button>
 				<p className="text-sm text-muted">
 					{hasPayments

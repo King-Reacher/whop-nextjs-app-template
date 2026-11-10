@@ -29,3 +29,18 @@ export const WHATSAPP_NUMBER = (
 ).replace(/\D/g, "");
 
 export const REF_COOKIE = "solon_ref";
+
+export const ROOM_TYPES = [
+	"Single room",
+	"Self-contained",
+	"Room and parlour",
+] as const;
+
+export const RENT_CAPS = [150_000, 200_000, 250_000, 300_000, 400_000];
+export const WALK_CAPS = [10, 15, 20];
+
+/** Rough centre of the off-campus areas, used to open the map. */
+export const MAP_CENTER = { lat: 7.2, lng: 3.44 };
+
+export const SESSION_COOKIE = "solon_session";
+export const DEMO_CODE_COOKIE = "solon_demo_code";

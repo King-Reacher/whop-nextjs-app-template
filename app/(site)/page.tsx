@@ -1,17 +1,77 @@
 import Link from "next/link";
-import { VerifiedBadge } from "@/components/hostel-bits";
-import { AREAS, BRAND, LOCK_FEE } from "@/lib/config";
+import { Filters } from "@/components/filters";
+import { HostelCard } from "@/components/hostel-card";
+import { HostelMap, type MapPin } from "@/components/hostel-map";
+import { BRAND, LOCK_FEE, MAP_CENTER } from "@/lib/config";
 import { naira } from "@/lib/format";
-import { listHostels } from "@/lib/hostels";
+import {
+	amenityOptions,
+	filterHostels,
+	type HostelFilters,
+	listHostels,
+} from "@/lib/hostels";
+import { currentStudent } from "@/lib/session";
+import { listSavedIds } from "@/lib/students";
+
+type Query = Record<string, string | string[] | undefined>;
+
+const one = (value: string | string[] | undefined) =>
+	Array.isArray(value) ? value[0] : value;
+
+function readFilters(query: Query): HostelFilters {
+	const has = query.has;
+	return {
+		area: one(query.area) || undefined,
+		type: one(query.type) || undefined,
+		maxRent: Number(one(query.rent)) || undefined,
+		maxWalk: Number(one(query.walk)) || undefined,
+		amenities: Array.isArray(has) ? has : has ? [has] : [],
+		sort: one(query.sort) === "high" ? "high" : "low",
+	};
+}
+
+/** The current query string with one parameter changed, for the view toggle. */
+function withView(query: Query, view: "list" | "map"): string {
+	const params = new URLSearchParams();
+	for (const [key, value] of Object.entries(query)) {
+		if (key === "view" || value === undefined) continue;
+		for (const v of Array.isArray(value) ? value : [value]) {
+			if (v) params.append(key, v);
+		}
+	}
+	if (view === "map") params.set("view", "map");
+	const text = params.toString();
+	return text ? `/?${text}` : "/";
+}
 
 export default async function HomePage({
 	searchParams,
 }: {
-	searchParams: Promise<{ area?: string }>;
+	searchParams: Promise<Query>;
 }) {
-	const { area } = await searchParams;
-	const all = await listHostels();
-	const hostels = area ? all.filter((h) => h.area === area) : all;
+	const query = await searchParams;
+	const view = one(query.view) === "map" ? "map" : "list";
+	const filters = readFilters(query);
+
+	const [all, student] = await Promise.all([listHostels(), currentStudent()]);
+	const hostels = filterHostels(all, filters);
+	const savedIds = student ? await listSavedIds(student.id) : [];
+
+	const pins: MapPin[] = hostels.flatMap((h) =>
+		h.lat === null || h.lng === null
+			? []
+			: [
+					{
+						id: h.id,
+						name: h.name,
+						detail: `${h.room_type}, ${h.area}. ${naira(h.rent_price)} / session`,
+						price: `₦${Math.round(Number(h.rent_price) / 1000)}k`,
+						lat: Number(h.lat),
+						lng: Number(h.lng),
+						available: h.is_available,
+					},
+				],
+	);
 
 	return (
 		<>
@@ -26,48 +86,45 @@ export default async function HomePage({
 				</p>
 			</section>
 
-			<nav aria-label="Filter by area" className="mt-6 flex flex-wrap gap-2">
-				<AreaChip label="All areas" href="/" active={!area} />
-				{AREAS.map((a) => (
-					<AreaChip
-						key={a}
-						label={a}
-						href={`/?area=${a}`}
-						active={area === a}
+			<Filters filters={filters} amenities={amenityOptions(all)} view={view} />
+
+			<div className="mt-6 flex items-center justify-between gap-4">
+				<p className="text-sm text-muted">
+					{hostels.length} {hostels.length === 1 ? "room" : "rooms"}
+				</p>
+				<div className="flex rounded-lg border border-line bg-card p-0.5 text-sm">
+					<ViewTab
+						href={withView(query, "list")}
+						label="List"
+						active={view === "list"}
 					/>
-				))}
-			</nav>
+					<ViewTab
+						href={withView(query, "map")}
+						label="Map"
+						active={view === "map"}
+					/>
+				</div>
+			</div>
 
 			{hostels.length === 0 ? (
-				<p className="mt-10 text-muted">
-					No hostels listed in {area} yet. <Link href="/">See all areas</Link>.
+				<p className="mt-8 text-muted">
+					No rooms match those filters. Try a higher rent or fewer must-haves.
 				</p>
+			) : view === "map" ? (
+				<div className="mt-4">
+					<HostelMap pins={pins} center={MAP_CENTER} />
+					{pins.length < hostels.length && (
+						<p className="mt-2 text-sm text-muted">
+							{hostels.length - pins.length} of these rooms have no map location
+							yet. Switch to the list to see them.
+						</p>
+					)}
+				</div>
 			) : (
-				<ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+				<ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 					{hostels.map((h) => (
 						<li key={h.id}>
-							<Link
-								href={`/hostels/${h.id}`}
-								className="block h-full rounded-xl border border-line bg-card p-4 hover:border-brand transition-colors"
-							>
-								<div className="flex items-start justify-between gap-2">
-									<VerifiedBadge hostel={h} />
-									{!h.is_available && (
-										<span className="text-xs text-muted">Taken</span>
-									)}
-								</div>
-								<h2 className="mt-3 font-medium">{h.name}</h2>
-								<p className="text-sm text-muted">
-									{h.room_type} · {h.area}
-									{h.walk_minutes ? ` · ${h.walk_minutes} min walk` : ""}
-								</p>
-								<p className="mt-4">
-									<span className="text-xl font-semibold">
-										{naira(h.rent_price)}
-									</span>
-									<span className="text-sm text-muted"> / session</span>
-								</p>
-							</Link>
+							<HostelCard hostel={h} saved={savedIds.includes(h.id)} />
 						</li>
 					))}
 				</ul>
@@ -76,23 +133,21 @@ export default async function HomePage({
 	);
 }
 
-function AreaChip({
-	label,
+function ViewTab({
 	href,
+	label,
 	active,
 }: {
-	label: string;
 	href: string;
+	label: string;
 	active: boolean;
 }) {
 	return (
 		<Link
 			href={href}
 			aria-current={active ? "page" : undefined}
-			className={`rounded-full border px-4 py-1.5 text-sm ${
-				active
-					? "border-brand bg-brand text-white"
-					: "border-line bg-card text-ink hover:border-brand"
+			className={`rounded-md px-4 py-1.5 ${
+				active ? "bg-brand text-white" : "text-muted hover:text-ink"
 			}`}
 		>
 			{label}

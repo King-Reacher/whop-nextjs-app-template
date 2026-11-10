@@ -1,4 +1,4 @@
-# Solon — verified student hostels near FUNAAB
+# Solon: verified student hostels near FUNAAB
 
 The Week 1 MVP of the Heinrich & Solon Group student housing platform. It lives
 in the `app/(site)` route group; the original Whop app template is untouched in
@@ -8,10 +8,12 @@ in the `app/(site)` route group; the original Whop app template is untouched in
 
 | Route | What it does |
 | --- | --- |
-| `/` | The feed: listings with area filter (Camp, Oluwo, Isolu), rent and verified badge. |
-| `/hostels/[id]` | Video walkthrough, details, "Lock down this room" and an "Ask on WhatsApp" link with a pre-filled message. |
+| `/` | The feed. Filter by area, room type, rent, walk time and amenities, and switch between a list and a map with price pins. |
+| `/hostels/[id]` | Video walkthrough, photo gallery, details, "Lock down this room", "Save room" and an "Ask on WhatsApp" link with a pre-filled message. |
 | `/hostels/[id]/lock` | Lock form. Ticking "Apply for a payment plan" collects matric number and guarantor details. |
 | `/bookings/[ref]` | Confirmation page. Verifies the payment with Paystack and hands off to WhatsApp. |
+| `/sign-in` | Sign in with a phone number and a 6-digit code sent by text. No passwords. Only needed to save rooms. |
+| `/saved` | A signed-in student's saved rooms and their bookings. |
 | `/rent-index` | Average, lowest and highest rent per area, computed from the listings. |
 | `/api/paystack/webhook` | Signed Paystack webhook that marks a booking paid and takes the room off the market. |
 
@@ -41,16 +43,32 @@ With no other configuration the site shows **sample listings** under a visible
 banner, keeps bookings in memory and skips online payment. To go live, copy
 `.env.example` to `.env.local` and fill in:
 
-1. **Supabase** — create a project, run `supabase/schema.sql`, set `SUPABASE_URL`
+1. **Supabase**: create a project, run `supabase/schema.sql`, set `SUPABASE_URL`
    and `SUPABASE_SERVICE_ROLE_KEY`, then add scouted hostels to the `hostels`
-   table (set `verified_at` once a scout has physically visited).
-2. **Paystack** — set `PAYSTACK_SECRET_KEY` and add a webhook pointing at
+   table. Set `verified_at` once a scout has physically visited, `lat` and `lng`
+   to put the room on the map, and `photos` to a list of image URLs.
+2. **Paystack**: set `PAYSTACK_SECRET_KEY` and add a webhook pointing at
    `https://your-domain/api/paystack/webhook`.
-3. **WhatsApp** — set `NEXT_PUBLIC_WHATSAPP_NUMBER` (e.g. `2348012345678`).
+3. **WhatsApp**: set `NEXT_PUBLIC_WHATSAPP_NUMBER` (e.g. `2348012345678`).
+4. **Sign-in**: set `SESSION_SECRET` (`openssl rand -hex 32`) and a Termii key
+   (`TERMII_API_KEY`) so codes are sent by text. Without Termii, codes are shown
+   on screen in development and in the sample-data demo only. Once Supabase is
+   connected in production, sign-in stays off until both are set.
+
+## Installing it like an app
+
+The site ships a web app manifest and icons, so students can use "Add to Home
+screen" in Chrome or Safari and open it full-screen from an icon. There is no
+offline mode yet.
+
+The map uses OpenStreetMap's public tile server, which is fine for a pilot. If
+traffic grows, switch the tile URL in `components/hostel-map.tsx` to a paid
+provider.
 
 ## Done by hand in Week 1
 
-- Adding listings and videos: straight into the Supabase table.
+- Adding listings, videos, photos and map coordinates: straight into the
+  Supabase table.
 - Releasing or refunding a lock fee: Paystack dashboard, then update the
   booking's `status` to `released` or `refunded` and the hostel's `is_available`.
 - Payment plans: the site only records the request and the KYC details. Nothing

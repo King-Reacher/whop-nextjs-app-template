@@ -87,3 +87,24 @@ export async function markHeld(
 	);
 	return rows.length > 0;
 }
+
+export async function listBookingsByPhone(phone: string): Promise<Booking[]> {
+	if (!hasDatabase) {
+		return [...memory.values()]
+			.filter((b) => b.student_phone === phone)
+			.reverse();
+	}
+	return db<Booking[]>(
+		`bookings?student_phone=eq.${phone}&select=*&order=created_at.desc`,
+	);
+}
+
+/** Student-facing label for a booking status. */
+export function statusLabel(status: BookingStatus, paymentsOn: boolean) {
+	return {
+		pending_payment: paymentsOn ? "Awaiting payment" : "Request received",
+		held: "Room locked",
+		released: "Moved in",
+		refunded: "Refunded",
+	}[status];
+}

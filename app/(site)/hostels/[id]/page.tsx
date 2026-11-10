@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Gallery } from "@/components/gallery";
 import { VerifiedBadge, Walkthrough } from "@/components/hostel-bits";
 import { BRAND, LOCK_FEE, LOCK_HOURS } from "@/lib/config";
 import { installmentPlan, naira, whatsappLink } from "@/lib/format";
 import { getHostel, listReviews } from "@/lib/hostels";
+import { currentStudent } from "@/lib/session";
+import { listSavedIds } from "@/lib/students";
+import { toggleSaved } from "../../actions";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -17,7 +21,13 @@ export default async function HostelPage({ params }: Props) {
 	const hostel = await getHostel(Number((await params).id));
 	if (!hostel) notFound();
 
-	const reviews = await listReviews(hostel.id);
+	const [reviews, student] = await Promise.all([
+		listReviews(hostel.id),
+		currentStudent(),
+	]);
+	const saved = student
+		? (await listSavedIds(student.id)).includes(hostel.id)
+		: false;
 	const plan = installmentPlan(hostel.rent_price);
 	const inquire = whatsappLink(
 		`Hi, I saw ${hostel.name} (ID ${hostel.id}) on ${BRAND.name} and would like to schedule a viewing.`,
@@ -31,6 +41,7 @@ export default async function HostelPage({ params }: Props) {
 				</Link>
 				<div className="mt-4">
 					<Walkthrough hostel={hostel} />
+					<Gallery photos={hostel.photos} name={hostel.name} />
 				</div>
 				<div className="mt-5 flex flex-wrap items-center gap-2">
 					<VerifiedBadge hostel={hostel} />
@@ -116,11 +127,21 @@ export default async function HostelPage({ params }: Props) {
 					</a>
 				)}
 
+				<form action={toggleSaved.bind(null, hostel.id, saved)}>
+					<button
+						type="submit"
+						aria-pressed={saved}
+						className="mt-3 block w-full rounded-lg border border-line px-4 py-3 text-center text-sm font-medium hover:border-brand"
+					>
+						{saved ? "Saved. Tap to remove" : "Save room"}
+					</button>
+				</form>
+
 				<div className="mt-5 border-t border-line pt-4 text-sm">
 					<p className="font-medium">Can't pay it all at once?</p>
 					<p className="mt-1 text-muted">
 						Pay {naira(plan.upfrontTotal)} now, then about {naira(plan.monthly)}{" "}
-						a month for {plan.months} months. Estimate only — every plan is
+						a month for {plan.months} months. Estimate only. Every plan is
 						reviewed before approval.
 					</p>
 				</div>
